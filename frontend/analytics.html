@@ -107,7 +107,7 @@
   </main>
 
   <script>
-    const API = 'http://127.0.0.1:8000';
+    const API = window.location.origin;
 
     function formatNum(n) {
       if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';

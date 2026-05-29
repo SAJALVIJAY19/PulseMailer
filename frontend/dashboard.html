@@ -103,7 +103,7 @@
   </main>
 
   <script>
-    const API = 'http://127.0.0.1:8000';
+    const API = window.location.origin;
 
     function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
