@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+langchain
+langchain-groq
+groq
+sqlalchemy
+asyncpg
+psycopg2-binary
+redis
+upstash-redis
+apscheduler
+python-dotenv

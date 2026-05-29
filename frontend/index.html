@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseMailer — AI Email Campaigns</title>
+  <meta name="description" content="Generate high-converting email campaigns in seconds with AI powered by Groq and LangChain.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #020817; color: #e2e8f0; margin: 0; overflow-x: hidden; }
+
+    /* Background Orbs */
+    .orb { position: fixed; border-radius: 9999px; filter: blur(120px); z-index: -1; pointer-events: none; }
+    .orb-cyan { width: 500px; height: 500px; background: rgba(34,211,238,0.15); top: -120px; left: -120px; }
+    .orb-blue { width: 480px; height: 480px; background: rgba(37,99,235,0.15); bottom: -100px; right: -100px; }
+    .orb-indigo { width: 400px; height: 400px; background: rgba(99,102,241,0.08); top: 40%; left: 45%; }
+
+    /* Glass */
+    .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+
+    /* Gradient text */
+    .grad-text { background: linear-gradient(135deg, #22d3ee, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Inputs */
+    .field { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 16px; color: #fff; font-size: 14px; width: 100%; outline: none; transition: border-color 0.2s; font-family: 'Inter', sans-serif; }
+    .field::placeholder { color: #64748b; }
+    .field:focus { border-color: #22d3ee; }
+    select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; }
+    select.field option { background: #0f172a; color: #e2e8f0; }
+
+    /* Primary button */
+    .btn-primary { background: linear-gradient(135deg, #22d3ee, #2563eb); border: none; border-radius: 10px; padding: 14px 24px; font-weight: 600; font-size: 15px; color: #fff; cursor: pointer; box-shadow: 0 0 24px rgba(34,211,238,0.25); transition: all 0.2s; font-family: 'Inter', sans-serif; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* Glass button */
+    .btn-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-glass:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+    .btn-glass.copied { border-color: rgba(34,197,94,0.3); color: #22c55e; }
+
+    /* Badge */
+    .badge { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: #22d3ee; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+
+    /* Range slider */
+    input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; outline: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 0 12px rgba(34,211,238,0.5); border: 2px solid #22d3ee; }
+    input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 0 12px rgba(34,211,238,0.5); border: 2px solid #22d3ee; }
+
+    /* Toggle */
+    .toggle-track { width: 48px; height: 26px; background: #334155; border-radius: 13px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-track.active { background: #22d3ee; }
+    .toggle-thumb { width: 20px; height: 20px; background: #fff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: transform 0.2s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .toggle-track.active .toggle-thumb { transform: translateX(22px); }
+
+    /* Spinner */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Animations */
+    .slide-up { animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Toast */
+    .toast { position: fixed; top: 80px; right: 24px; z-index: 100; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; animation: toastIn 0.3s ease forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    .toast-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .toast-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+
+    /* Navbar */
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px; background: rgba(2,8,23,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+    .nav-brand { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-link { color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+    .nav-link:hover { color: #fff; }
+    .nav-link.active { color: #22d3ee; border-bottom: 2px solid #22d3ee; padding-bottom: 2px; }
+
+    /* Label */
+    .label { font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 8px; display: block; }
+  </style>
+</head>
+<body>
+  <!-- Orbs -->
+  <div class="orb orb-cyan"></div>
+  <div class="orb orb-blue"></div>
+  <div class="orb orb-indigo"></div>
+
+  <!-- Toast container -->
+  <div id="toast-box"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="landing.html" class="nav-brand grad-text" style="text-decoration: none;">PulseMailer</a>
+    <div class="nav-links">
+      <a href="landing.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a href="index.html" class="nav-link active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Generate
+      </a>
+      <a href="dashboard.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        History
+      </a>
+      <a href="analytics.html" class="nav-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Analytics
+      </a>
+    </div>
+  </nav>
+
+  <main style="padding-top:120px; max-width:720px; margin:0 auto; padding-left:24px; padding-right:24px; padding-bottom:100px;">
+
+    <!-- Hero -->
+    <section style="text-align:center; margin-bottom:64px;">
+      <div class="badge" style="margin-bottom:24px; display:inline-flex;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        AI-Powered Platform
+      </div>
+      <h1 style="font-size:64px; font-weight:800; line-height:1.05; letter-spacing:-2px; margin:0 0 20px;">
+        Generate Emails<br>
+        <span class="grad-text">That Convert</span>
+      </h1>
+      <p style="color:#94a3b8; font-size:18px; max-width:480px; margin:0 auto 28px; line-height:1.6;">
+        Build high-converting email campaigns in seconds with our LangChain-powered AI engine
+      </p>
+      <div style="display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <span class="badge" style="user-select: none; pointer-events: none; cursor: default;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Powered by Groq LLM
+        </span>
+        <span class="badge" style="user-select: none; pointer-events: none; cursor: default;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          LangChain Pipeline
+        </span>
+      </div>
+    </section>
+
+    <!-- Form Card -->
+    <section class="glass" style="padding:32px; margin-bottom:40px;">
+      <div style="margin-bottom:24px;">
+        <h2 style="font-size:20px; font-weight:600; color:#fff; margin:0 0 4px;">Create Campaign</h2>
+        <p style="color:#94a3b8; font-size:14px; margin:0;">Fill in the details below</p>
+      </div>
+      <div style="height:1px; background:rgba(255,255,255,0.06); margin-bottom:24px;"></div>
+
+      <form id="campaign-form">
+        <!-- Row 1 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div>
+            <label class="label">Product / Brand Name</label>
+            <input type="text" id="product_name" class="field" placeholder="e.g. Nike Running Shoes" required minlength="1" maxlength="100">
+          </div>
+          <div>
+            <label class="label">Target Audience</label>
+            <input type="text" id="target_audience" class="field" placeholder="e.g. Young athletes aged 18-25" required minlength="5">
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div>
+            <label class="label">Email Tone</label>
+            <select id="tone" class="field">
+              <option value="professional">Professional</option>
+              <option value="casual">Casual</option>
+              <option value="urgent">Urgent</option>
+              <option value="friendly">Friendly</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Campaign Goal</label>
+            <select id="goal" class="field">
+              <option value="awareness">Awareness</option>
+              <option value="conversion">Conversion</option>
+              <option value="retention">Retention</option>
+              <option value="re-engagement">Re-engagement</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: Slider -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <label class="label" style="margin-bottom:0;">Number of Variants</label>
+            <span id="variant-badge" class="badge">1</span>
+          </div>
+          <input type="range" id="num_variants" min="1" max="5" value="1">
+        </div>
+
+        <!-- Row 4: Toggle -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;">
+          <label class="label" style="margin-bottom:0;">Schedule Weekly</label>
+          <div id="toggle-track" class="toggle-track" onclick="toggleSwitch()">
+            <div class="toggle-thumb"></div>
+          </div>
+        </div>
+        <input type="hidden" id="schedule_weekly" value="false">
+
+        <!-- Submit -->
+        <button type="submit" id="submit-btn" class="btn-primary">
+          <span id="btn-content">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Generate Campaign
+          </span>
+          <span id="btn-loading" style="display:none; align-items:center; gap:8px;">
+            <span class="spinner"></span>
+            Generating with AI...
+          </span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Results -->
+    <section id="results-section" style="display:none;"></section>
+  </main>
+
+  <script>
+    const API = 'http://127.0.0.1:8000';
+    let scheduleWeekly = false;
+
+    // Slider
+    const slider = document.getElementById('num_variants');
+    const variantBadge = document.getElementById('variant-badge');
+    slider.addEventListener('input', () => { variantBadge.textContent = slider.value; });
+
+    // Toggle
+    function toggleSwitch() {
+      scheduleWeekly = !scheduleWeekly;
+      document.getElementById('toggle-track').classList.toggle('active', scheduleWeekly);
+      document.getElementById('schedule_weekly').value = scheduleWeekly;
+    }
+
+    // Toast
+    function showToast(msg, type = 'error') {
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.textContent = msg;
+      document.getElementById('toast-box').appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    // Copy
+    function copyToClipboard(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        btnEl.classList.add('copied');
+        const orig = btnEl.innerHTML;
+        btnEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied`;
+        setTimeout(() => { btnEl.innerHTML = orig; btnEl.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    // Form submit
+    document.getElementById('campaign-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const btnContent = document.getElementById('btn-content');
+      const btnLoading = document.getElementById('btn-loading');
+
+      btn.disabled = true;
+      btnContent.style.display = 'none';
+      btnLoading.style.display = 'flex';
+
+      const payload = {
+        product_name: document.getElementById('product_name').value,
+        target_audience: document.getElementById('target_audience').value,
+        tone: document.getElementById('tone').value,
+        goal: document.getElementById('goal').value,
+        num_variants: parseInt(slider.value),
+        schedule_weekly: scheduleWeekly,
+      };
+
+      try {
+        const res = await fetch(`${API}/generate/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Generation failed'); }
+        const data = await res.json();
+        renderResults(data);
+        showToast('Campaign generated successfully!', 'success');
+      } catch (err) {
+        showToast(err.message || 'Something went wrong', 'error');
+      } finally {
+        btn.disabled = false;
+        btnContent.style.display = 'flex';
+        btnLoading.style.display = 'none';
+      }
+    });
+
+    function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    function renderResults(data) {
+      const section = document.getElementById('results-section');
+      section.style.display = 'block';
+
+      const cachedBadge = data.cached
+        ? `<span class="badge" style="background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.2); color:#4ade80;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            Served from Cache
+          </span>` : '';
+
+      let cards = '';
+      data.emails.forEach((email, i) => {
+        cards += `
+          <div class="glass slide-up" style="padding:24px; margin-top:16px; animation-delay:${i * 0.1}s;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+              <span class="badge">Variant ${i + 1}</span>
+              <span style="color:#64748b; font-size:12px;">~${email.tokens_used} tokens</span>
+            </div>
+            <div style="margin-bottom:16px;">
+              <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#94a3b8; font-weight:500;">Subject Line</span>
+              <p style="color:#fff; font-size:18px; font-weight:600; margin:4px 0 0; line-height:1.4;">${esc(email.subject_line)}</p>
+            </div>
+            <div style="height:1px; background:rgba(255,255,255,0.06); margin:16px 0;"></div>
+            <div style="margin-bottom:16px;">
+              <span style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#94a3b8; font-weight:500;">Email Body</span>
+              <p style="color:#cbd5e1; font-size:14px; line-height:1.7; margin:4px 0 0; white-space:pre-line;">${esc(email.body)}</p>
+            </div>
+            <div style="height:1px; background:rgba(255,255,255,0.06); margin:16px 0;"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+              <span class="btn-primary" style="width:auto; padding:10px 20px; font-size:13px; cursor:default; box-shadow:0 0 16px rgba(34,211,238,0.2);">${esc(email.cta_text)}</span>
+              <div style="display:flex; gap:8px;">
+                <button class="btn-glass" onclick="copyToClipboard('${escJs(email.subject_line)}', this)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  Copy Subject
+                </button>
+                <button class="btn-glass" onclick="copyToClipboard(\`${escJs(email.subject_line)}\\n\\n${escJs(email.body)}\\n\\n${escJs(email.cta_text)}\`, this)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  Copy Email
+                </button>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      section.innerHTML = `
+        <div class="fade-in">
+          <div class="glass" style="padding:20px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:rgba(34,211,238,0.04); border-color:rgba(34,211,238,0.15);">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:40px; height:40px; border-radius:10px; background:rgba(34,197,94,0.15); display:flex; align-items:center; justify-content:center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              </div>
+              <div>
+                <p style="color:#fff; font-weight:600; font-size:15px; margin:0;">Campaign Generated Successfully</p>
+                <p style="color:#64748b; font-size:12px; margin:2px 0 0; font-family:monospace;">${data.campaign_id}</p>
+              </div>
+            </div>
+            ${cachedBadge}
+          </div>
+          ${cards}
+        </div>`;
+
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+
+    function escJs(t) {
+      return t.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/`/g, '\\`').replace(/\n/g, '\\n').replace(/\r/g, '');
+    }
+  </script>
+</body>
+</html>
