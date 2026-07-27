@@ -7,20 +7,21 @@
   <meta name="description" content="Monitor your AI email campaign performance, token usage, and cache efficiency.">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
-    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Space Grotesk', 'sans-serif'] } } } }
   </script>
   <style>
+    *, .glass, .btn-glass, [class*="rounded"] { border-radius: 0 !important; }
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #020817; color: #e2e8f0; margin: 0; overflow-x: hidden; }
+    body { font-family: 'Space Grotesk', 'sans-serif'; background: #020817; color: #e2e8f0; margin: 0; overflow-x: hidden; }
 
     .orb { position: fixed; border-radius: 9999px; filter: blur(120px); z-index: -1; pointer-events: none; }
     .orb-cyan { width: 500px; height: 500px; background: rgba(34,211,238,0.15); top: -120px; left: -120px; }
     .orb-blue { width: 480px; height: 480px; background: rgba(37,99,235,0.15); bottom: -100px; right: -100px; }
     .orb-indigo { width: 400px; height: 400px; background: rgba(99,102,241,0.08); top: 40%; left: 45%; }
 
-    .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+    .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 0; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
     .grad-text { background: linear-gradient(135deg, #22d3ee, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
     .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px; background: rgba(2,8,23,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
@@ -30,19 +31,19 @@
     .nav-link:hover { color: #fff; }
     .nav-link.active { color: #22d3ee; border-bottom: 2px solid #22d3ee; padding-bottom: 2px; }
 
-    .btn-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 0; padding: 8px 14px; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', 'sans-serif'; display: inline-flex; align-items: center; gap: 6px; }
     .btn-glass:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
 
-    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 12px; }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
     .slide-up { animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards; opacity: 0; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    .bar-track { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 4px; width: 0; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .bar-track { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 0; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 0; width: 0; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
-    .stat-accent { height: 2px; border-radius: 1px; background: linear-gradient(135deg, #22d3ee, #2563eb); margin-top: auto; }
+    .stat-accent { height: 2px; border-radius: 0; background: linear-gradient(135deg, #22d3ee, #2563eb); margin-top: auto; }
   </style>
 </head>
 <body>
@@ -204,7 +205,7 @@
         statCards.forEach((c, i) => {
           cardsHtml += `
             <div class="glass slide-up" style="padding:24px; display:flex; flex-direction:column; animation-delay:${i * 0.08}s;">
-              <div style="width:48px; height:48px; border-radius:12px; background:${c.iconBg}; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
+              <div style="width:48px; height:48px; border-radius:0; background:${c.iconBg}; display:flex; align-items:center; justify-content:center; margin-bottom:20px;">
                 ${c.icon}
               </div>
               <p class="stat-value" data-target="${c.value}" data-suffix="${c.suffix}" style="color:#fff; font-size:40px; font-weight:800; margin:0; letter-spacing:-1px; line-height:1;">0${c.suffix}</p>
