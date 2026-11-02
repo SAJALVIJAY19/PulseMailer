@@ -4,10 +4,11 @@ pydantic
 langchain
 langchain-groq
 groq
-sqlalchemy
+sqlalchemy<2.1
 asyncpg
 psycopg2-binary
 redis
 upstash-redis
 apscheduler
 python-dotenv
+psycopg[binary]

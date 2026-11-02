@@ -14,28 +14,28 @@
   <style>
     *, .glass, .btn-glass, .badge, [class*="rounded"] { border-radius: 0 !important; }
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Space Grotesk', 'sans-serif'; background: #020817; color: #e2e8f0; margin: 0; overflow-x: hidden; }
+    body { font-family: 'Space Grotesk', 'sans-serif'; background: #0d0e12; color: #f1f1f4; margin: 0; overflow-x: hidden; }
 
     .orb { position: fixed; border-radius: 9999px; filter: blur(120px); z-index: -1; pointer-events: none; }
-    .orb-cyan { width: 500px; height: 500px; background: rgba(34,211,238,0.15); top: -120px; left: -120px; }
-    .orb-blue { width: 480px; height: 480px; background: rgba(37,99,235,0.15); bottom: -100px; right: -100px; }
-    .orb-indigo { width: 400px; height: 400px; background: rgba(99,102,241,0.08); top: 40%; left: 45%; }
+    .orb-red { width: 500px; height: 500px; background: rgba(239,68,68,0.12); top: -120px; left: -120px; }
+    .orb-darkwhite { width: 500px; height: 500px; background: rgba(255,255,255,0.04); bottom: -100px; right: -100px; }
+    .orb-ruby { width: 420px; height: 420px; background: rgba(185,28,28,0.08); top: 40%; left: 45%; }
 
-    .glass { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 0; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
-    .grad-text { background: linear-gradient(135deg, #22d3ee, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glass { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px); border-radius: 0; box-shadow: 0 4px 24px rgba(0,0,0,0.5); }
+    .grad-text { background: linear-gradient(135deg, #ffffff 15%, #fca5a5 50%, #ef4444 85%, #dc2626 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px; background: rgba(2,8,23,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+    .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px; background: rgba(13,14,18,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
     .nav-brand { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; text-decoration: none; }
     .nav-links { display: flex; align-items: center; gap: 28px; }
-    .nav-link { color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+    .nav-link { color: #a1a1aa; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
     .nav-link:hover { color: #fff; }
-    .nav-link.active { color: #22d3ee; border-bottom: 2px solid #22d3ee; padding-bottom: 2px; }
+    .nav-link.active { color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 2px; }
 
-    .badge { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: #22d3ee; border-radius: 0; padding: 3px 10px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+    .badge { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #f87171; border-radius: 0; padding: 3px 10px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
 
-    .btn-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 0; padding: 8px 14px; color: #94a3b8; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', 'sans-serif'; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-glass:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-    .btn-glass.copied { border-color: rgba(34,197,94,0.3); color: #22c55e; }
+    .btn-glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 0; padding: 8px 14px; color: #a1a1aa; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Space Grotesk', 'sans-serif'; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-glass:hover { background: rgba(255,255,255,0.08); color: #f4f4f5; border-color: rgba(255,255,255,0.18); }
+    .btn-glass.copied { border-color: rgba(239,68,68,0.4); color: #f87171; }
 
     /* Skeleton */
     .skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0; }
@@ -52,16 +52,16 @@
     .chevron-icon.open { transform: rotate(180deg); }
 
     /* Tone badges */
-    .tone-professional { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); color: #60a5fa; }
-    .tone-casual { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); color: #4ade80; }
-    .tone-urgent { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: #f87171; }
-    .tone-friendly { background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.2); color: #facc15; }
+    .tone-professional { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #f4f4f5; }
+    .tone-casual { background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.25); color: #f472b6; }
+    .tone-urgent { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .tone-friendly { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: #fbbf24; }
   </style>
 </head>
 <body>
-  <div class="orb orb-cyan"></div>
-  <div class="orb orb-blue"></div>
-  <div class="orb orb-indigo"></div>
+  <div class="orb orb-red"></div>
+  <div class="orb orb-darkwhite"></div>
+  <div class="orb orb-ruby"></div>
 
   <!-- Navbar -->
   <nav class="navbar">
@@ -157,8 +157,8 @@
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
               </div>
               <p style="color:#fff; font-size:20px; font-weight:600; margin:0 0 6px;">No campaigns yet</p>
-              <p style="color:#94a3b8; font-size:14px; margin:0 0 24px;">Generate your first campaign to see it here</p>
-              <a href="index.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#22d3ee,#2563eb); color:#fff; font-size:14px; font-weight:600; padding:12px 24px; border-radius:0; text-decoration:none; box-shadow:0 0 24px rgba(34,211,238,0.2); transition:all 0.2s;">
+              <p style="color:#a1a1aa; font-size:14px; margin:0 0 24px;">Generate your first campaign to see it here</p>
+              <a href="index.html" style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; font-size:14px; font-weight:600; padding:12px 24px; border-radius:0; text-decoration:none; box-shadow:0 0 24px rgba(239,68,68,0.3); transition:all 0.2s;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 Create Campaign
               </a>
@@ -184,14 +184,14 @@
               emailsHtml += `
                 <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:0; padding:16px; margin-bottom:10px;">
                   <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <span style="font-size:12px; font-weight:600; color:#22d3ee;">Email ${ei + 1}</span>
+                    <span style="font-size:12px; font-weight:600; color:#ef4444;">Email ${ei + 1}</span>
                     <button class="btn-glass" style="padding:4px 10px; font-size:11px;" onclick="copyToClipboard('${jsSub}\\n\\n${jsBody}\\n\\n${jsCta}', this)">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                       Copy
                     </button>
                   </div>
                   <p style="color:#fff; font-weight:500; font-size:14px; margin:0 0 8px; line-height:1.4;">${esc(em.subject_line)}</p>
-                  <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer;" onclick="this.style.display='block'; this.style.webkitLineClamp='unset';">${esc(em.body)}</p>
+                  <p style="color:#a1a1aa; font-size:13px; line-height:1.6; margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer;" onclick="this.style.display='block'; this.style.webkitLineClamp='unset';">${esc(em.body)}</p>
                   <span class="badge" style="font-size:11px; padding:2px 8px;">${esc(em.cta_text)}</span>
                 </div>`;
             });
@@ -201,7 +201,7 @@
             <div class="glass slide-up" style="margin-bottom:12px; overflow:hidden; animation-delay:${idx * 0.05}s;">
               <div style="padding:20px 24px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:background 0.2s;" onclick="toggleExpand(${idx})" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                 <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                  <div style="width:40px; height:40px; border-radius:0; background:rgba(34,211,238,0.08); border:1px solid rgba(34,211,238,0.15); display:flex; align-items:center; justify-content:center; color:#22d3ee; font-size:16px; font-weight:700; flex-shrink:0;">
+                  <div style="width:40px; height:40px; border-radius:0; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); display:flex; align-items:center; justify-content:center; color:#f87171; font-size:16px; font-weight:700; flex-shrink:0;">
                     ${c.product_name.charAt(0).toUpperCase()}
                   </div>
                   <div style="min-width:0;">
