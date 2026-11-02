@@ -6,6 +6,10 @@ from datetime import datetime
 
 class CampaignRequest(BaseModel):
     product_name: str = Field(..., min_length=1, max_length=100)
+    brand_description: str = Field(
+        default="", 
+        max_length=500
+    )
     tone: Literal["professional", "casual", "urgent", "friendly"]
     target_audience: str = Field(..., min_length=5)
     goal: Literal["awareness", "conversion", "retention", "re-engagement"]

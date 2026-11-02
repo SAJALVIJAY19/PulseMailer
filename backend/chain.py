@@ -7,18 +7,19 @@ import json
 load_dotenv()
 
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model=os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b"),
     temperature=0.7,
-    api_key=os.getenv("GROQ_API_KEY"),
+    api_key=(os.getenv("GROQ_API_KEY") or "").strip(),
 )
 
 EMAIL_PROMPT = PromptTemplate(
-    input_variables=["product_name", "tone", "target_audience", "goal", "num_variants"],
+    input_variables=["product_name", "brand_description", "tone", "target_audience", "goal", "num_variants"],
     template="""You are an expert email marketing copywriter.
 
 Generate {num_variants} unique marketing email(s) for the following:
 
 Product/Brand: {product_name}
+Brand Description: {brand_description}
 Target Audience: {target_audience}
 Email Tone: {tone}
 Campaign Goal: {goal}
@@ -46,6 +47,7 @@ Rules:
 
 async def generate_emails(
     product_name: str,
+    brand_description: str,
     tone: str,
     target_audience: str,
     goal: str,
@@ -54,6 +56,7 @@ async def generate_emails(
     try:
         formatted_prompt = EMAIL_PROMPT.format(
             product_name=product_name,
+            brand_description=brand_description,
             tone=tone,
             target_audience=target_audience,
             goal=goal,

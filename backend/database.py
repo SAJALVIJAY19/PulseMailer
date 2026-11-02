@@ -30,6 +30,7 @@ class Campaign(Base):
 
     id = Column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     product_name = Column(String(100), nullable=False)
+    brand_description = Column(String(500), default="")
     tone = Column(String(20), nullable=False)
     target_audience = Column(String(500), nullable=False)
     goal = Column(String(50), nullable=False)

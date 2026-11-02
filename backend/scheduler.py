@@ -23,6 +23,7 @@ async def run_scheduled_campaigns():
                 # Call await generate_emails() with campaign's details
                 result = await generate_emails(
                     product_name=campaign.product_name,
+                    brand_description=getattr(campaign, "brand_description", "") or "",
                     tone=campaign.tone,
                     target_audience=campaign.target_audience,
                     goal=campaign.goal,
@@ -37,6 +38,7 @@ async def run_scheduled_campaigns():
                 new_campaign = Campaign(
                     id=campaign_id,
                     product_name=campaign.product_name,
+                    brand_description=getattr(campaign, "brand_description", "") or "",
                     tone=campaign.tone,
                     target_audience=campaign.target_audience,
                     goal=campaign.goal,
