@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from database import get_db, Campaign, GeneratedEmail
 
@@ -6,9 +6,18 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_history(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def get_history(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+    x_client_id: str = Header(default=""),
+):
+    if not x_client_id:
+        return []
+
     campaigns = (
         db.query(Campaign)
+        .filter(Campaign.client_id == x_client_id)
         .order_by(Campaign.created_at.desc())
         .offset(skip)
         .limit(limit)

@@ -106,6 +106,18 @@
   <script>
     const API = window.location.origin;
 
+    function getClientId() {
+      try {
+        let id = localStorage.getItem('pm_client_id');
+        if (!id) {
+          id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+            : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+          localStorage.setItem('pm_client_id', id);
+        }
+        return id;
+      } catch (e) { return ''; }
+    }
+
     function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
     function formatDate(iso) {
@@ -146,7 +158,11 @@
       container.innerHTML = showSkeleton();
 
       try {
-        const res = await fetch(`${API}/history/?skip=0&limit=50`);
+        const res = await fetch(`${API}/history/?skip=0&limit=50`, {
+          headers: {
+            'X-Client-Id': getClientId(),
+          },
+        });
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
 

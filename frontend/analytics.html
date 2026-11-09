@@ -110,6 +110,18 @@
   <script>
     const API = window.location.origin;
 
+    function getClientId() {
+      try {
+        let id = localStorage.getItem('pm_client_id');
+        if (!id) {
+          id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+            : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+          localStorage.setItem('pm_client_id', id);
+        }
+        return id;
+      } catch (e) { return ''; }
+    }
+
     function formatNum(n) {
       if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
       if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
@@ -177,7 +189,11 @@
       document.getElementById('cache-section').innerHTML = `<div class="skeleton" style="height:220px;"></div>`;
 
       try {
-        const res = await fetch(`${API}/stats/`);
+        const res = await fetch(`${API}/stats/`, {
+          headers: {
+            'X-Client-Id': getClientId(),
+          },
+        });
         if (!res.ok) throw new Error('Failed to fetch stats');
         const s = await res.json();
 

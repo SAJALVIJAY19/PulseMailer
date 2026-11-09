@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, String, Boolean, Integer, DateTime, Text, ForeignKey
+from sqlalchemy import create_engine, Column, String, Boolean, Integer, DateTime, Text, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from dotenv import load_dotenv
@@ -35,6 +35,7 @@ def get_db():
 
 class Campaign(Base):
     __tablename__ = "campaigns"
+    __table_args__ = (Index("idx_campaigns_client_created", "client_id", "created_at"),)
 
     id = Column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     product_name = Column(String(100), nullable=False)
@@ -45,6 +46,7 @@ class Campaign(Base):
     num_variants = Column(Integer, default=1)
     schedule_weekly = Column(Boolean, default=False)
     cached = Column(Boolean, default=False)
+    client_id = Column(String(64), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     emails = relationship("GeneratedEmail", back_populates="campaign")
@@ -66,3 +68,7 @@ class GeneratedEmail(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+
+
+
+

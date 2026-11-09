@@ -1,8 +1,8 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy.orm import Session
 from database import SessionLocal, Campaign
-from chain import generate_emails, calculate_tokens
+from chain import generate_emails, calculate_tokens, InvalidInputError
 from database import GeneratedEmail as GeneratedEmailDB
 from uuid import uuid4
 from datetime import datetime
@@ -23,7 +23,7 @@ async def run_scheduled_campaigns():
                 # Call await generate_emails() with campaign's details
                 result = await generate_emails(
                     product_name=campaign.product_name,
-                    brand_description=getattr(campaign, "brand_description", "") or "",
+                    brand_description=campaign.brand_description or "",
                     tone=campaign.tone,
                     target_audience=campaign.target_audience,
                     goal=campaign.goal,
@@ -33,25 +33,31 @@ async def run_scheduled_campaigns():
                 campaign_id = uuid4()
                 now = datetime.utcnow()
 
-                # Create new Campaign row in DB with same details,
-                # schedule_weekly=True, cached=False, new id, new created_at = datetime.utcnow()
+                # Create new Campaign row with schedule_weekly=False
+                # so it won't be picked up again next week
                 new_campaign = Campaign(
                     id=campaign_id,
                     product_name=campaign.product_name,
-                    brand_description=getattr(campaign, "brand_description", "") or "",
+                    brand_description=campaign.brand_description or "",
                     tone=campaign.tone,
                     target_audience=campaign.target_audience,
                     goal=campaign.goal,
                     num_variants=campaign.num_variants,
-                    schedule_weekly=True,
+                    schedule_weekly=False,
                     cached=False,
+                    client_id=campaign.client_id,
                     created_at=now,
                 )
                 db.add(new_campaign)
 
                 # Save each generated email linked to new campaign_id
-                for email in result.get("emails", []):
-                    tokens = calculate_tokens(email["body"] + " " + email["subject_line"])
+                emails = result.get("emails", [])
+                total_tokens = result.get("total_tokens", 0)
+                for email in emails:
+                    if total_tokens > 0:
+                        tokens = total_tokens // len(emails)
+                    else:
+                        tokens = calculate_tokens(email["body"] + " " + email["subject_line"])
                     db_email = GeneratedEmailDB(
                         id=uuid4(),
                         campaign_id=campaign_id,
@@ -65,6 +71,9 @@ async def run_scheduled_campaigns():
 
                 db.commit()
                 logger.info(f"Scheduled campaign generated for {campaign.product_name}")
+            except InvalidInputError as inv_err:
+                db.rollback()
+                logger.warning(f"Invalid input for scheduled campaign {campaign.product_name}: {inv_err}")
             except Exception as cam_err:
                 db.rollback()
                 logger.error(f"Failed to generate scheduled campaign for {campaign.product_name}: {cam_err}")
@@ -77,9 +86,11 @@ async def run_scheduled_campaigns():
 def start_scheduler():
     scheduler.add_job(
         run_scheduled_campaigns,
-        trigger=IntervalTrigger(weeks=1),
+        trigger=CronTrigger(day_of_week="mon", hour=9, minute=0),
         id="weekly_campaigns",
         replace_existing=True,
+        misfire_grace_time=3600,
+        coalesce=True,
     )
     scheduler.start()
     logger.info("Scheduler started — weekly campaigns enabled")

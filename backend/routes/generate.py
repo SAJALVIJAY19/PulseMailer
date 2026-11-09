@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
 from models import CampaignRequest, CampaignResponse, GeneratedEmail as GeneratedEmailModel
 from database import get_db, Campaign, GeneratedEmail as GeneratedEmailDB
-from chain import generate_emails, calculate_tokens
-from cache import generate_cache_key, get_cached_response, set_cached_response
+from chain import generate_emails, calculate_tokens, InvalidInputError
+from cache import generate_cache_key, get_cached_response, set_cached_response, check_rate_limit
 from uuid import uuid4
 from datetime import datetime
 
@@ -11,10 +11,27 @@ router = APIRouter()
 
 
 @router.post("/", response_model=CampaignResponse)
-async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db)):
+async def create_campaign(
+    http_request: Request,
+    request: CampaignRequest,
+    db: Session = Depends(get_db),
+    x_client_id: str = Header(default=""),
+):
+    forwarded = http_request.headers.get("x-forwarded-for")
+    if forwarded:
+        ip = forwarded.split(",")[0].strip()
+    else:
+        ip = http_request.client.host
+    if not check_rate_limit(ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please wait a minute and try again.",
+            headers={"Retry-After": "60"},
+        )
     try:
         cache_key = generate_cache_key(
             request.product_name,
+            request.brand_description,
             request.tone,
             request.target_audience,
             request.goal,
@@ -38,6 +55,7 @@ async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db
                 num_variants=request.num_variants,
                 schedule_weekly=request.schedule_weekly,
                 cached=True,
+                client_id=x_client_id,
                 created_at=now,
             )
             db.add(db_campaign)
@@ -50,7 +68,7 @@ async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db
                     subject_line=email["subject_line"],
                     body=email["body"],
                     cta_text=email["cta_text"],
-                    tokens_used=calculate_tokens(email["body"] + " " + email["subject_line"]),
+                    tokens_used=0,
                     created_at=now,
                 )
                 db.add(db_email)
@@ -59,7 +77,7 @@ async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db
                         subject_line=email["subject_line"],
                         body=email["body"],
                         cta_text=email["cta_text"],
-                        tokens_used=calculate_tokens(email["body"] + " " + email["subject_line"]),
+                        tokens_used=0,
                     )
                 )
 
@@ -96,13 +114,19 @@ async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db
             num_variants=request.num_variants,
             schedule_weekly=request.schedule_weekly,
             cached=False,
+            client_id=x_client_id,
             created_at=now,
         )
         db.add(db_campaign)
 
         email_models = []
-        for email in result["emails"]:
-            tokens = calculate_tokens(email["body"] + " " + email["subject_line"])
+        emails = result["emails"]
+        total_tokens = result.get("total_tokens", 0)
+        for email in emails:
+            if total_tokens > 0:
+                tokens = total_tokens // len(emails)
+            else:
+                tokens = calculate_tokens(email["body"] + " " + email["subject_line"])
             db_email = GeneratedEmailDB(
                 id=uuid4(),
                 campaign_id=campaign_id,
@@ -134,6 +158,10 @@ async def create_campaign(request: CampaignRequest, db: Session = Depends(get_db
             created_at=now,
         )
 
+    except HTTPException:
+        raise
+    except InvalidInputError:
+        raise HTTPException(status_code=422, detail="Please enter a real brand name, description and audience.")
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:

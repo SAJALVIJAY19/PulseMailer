@@ -46,6 +46,11 @@ ROOT_DIR = os.path.dirname(BASE_DIR)
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
 @app.get("/")
 @app.get("/landing.html")
 async def serve_landing():
